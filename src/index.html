@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>API Tester</title>
+<link rel="icon" href="../icons/icon32.png" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <img src="../icons/icon32.png" alt="" width="20" height="20" />
+        <span>API Tester</span>
+      </div>
+      <div class="header-actions">
+        <button id="layout-toggle" class="icon-btn" title="Toggle layout" aria-label="Toggle layout"></button>
+        <button id="theme-toggle" class="icon-btn" title="Cycle theme (auto / light / dark)" aria-label="Cycle theme">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="sidebar-search">
+      <input id="history-search" type="search" placeholder="Search history…" autocomplete="off" />
+    </div>
+
+    <div class="sidebar-actions">
+      <button id="new-request-btn" class="btn btn-primary btn-block">+ New request</button>
+      <button id="clear-history-btn" class="btn btn-ghost btn-block" title="Clear all history">Clear history</button>
+    </div>
+
+    <div id="history-list" class="history-list">
+      <div class="history-empty">No requests yet. Send one to see it here.</div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <div class="request-bar">
+      <select id="method-select" class="method-select">
+        <option>GET</option>
+        <option>POST</option>
+        <option>PUT</option>
+        <option>PATCH</option>
+        <option>DELETE</option>
+        <option>HEAD</option>
+        <option>OPTIONS</option>
+      </select>
+      <input id="url-input" class="url-input" type="text" placeholder="https://api.example.com/resource" autocomplete="off" spellcheck="false" />
+      <button id="send-btn" class="btn btn-primary">Send</button>
+    </div>
+
+    <div class="request-tabs">
+      <div class="tabs" data-target="request-panels">
+        <button class="tab active" data-tab="params">Params<span id="params-count" class="tab-badge hidden">0</span></button>
+        <button class="tab" data-tab="auth">Authorisation<span id="auth-badge" class="tab-badge hidden">On</span></button>
+        <button class="tab" data-tab="headers">Headers<span id="headers-count" class="tab-badge hidden">0</span></button>
+        <button class="tab" data-tab="body">Body</button>
+      </div>
+    </div>
+
+    <div id="request-panels" class="request-panels">
+
+      <section id="panel-params" class="panel active">
+        <div class="kv-editor" id="params-editor"></div>
+        <button class="btn btn-ghost btn-sm add-row-btn" data-editor="params-editor">+ Add param</button>
+      </section>
+
+      <section id="panel-auth" class="panel">
+        <div class="auth-type-row">
+          <label for="auth-type-select">Type</label>
+          <select id="auth-type-select">
+            <option value="none">No Auth</option>
+            <option value="bearer">Bearer Token</option>
+            <option value="basic">Basic Auth</option>
+            <option value="apikey">API Key</option>
+          </select>
+        </div>
+
+        <div id="auth-none" class="auth-fields">
+          <p class="auth-hint">This request does not use any authorization. It will be sent as-is.</p>
+        </div>
+
+        <div id="auth-bearer" class="auth-fields hidden">
+          <label class="field-label">Token</label>
+          <input type="text" id="auth-bearer-token" class="text-input mono" placeholder="Token" autocomplete="off" spellcheck="false" />
+        </div>
+
+        <div id="auth-basic" class="auth-fields hidden">
+          <label class="field-label">Username</label>
+          <input type="text" id="auth-basic-username" class="text-input" autocomplete="off" spellcheck="false" />
+          <label class="field-label">Password</label>
+          <input type="text" id="auth-basic-password" class="text-input mono" autocomplete="off" spellcheck="false" />
+        </div>
+
+        <div id="auth-apikey" class="auth-fields hidden">
+          <label class="field-label">Key</label>
+          <input type="text" id="auth-apikey-key" class="text-input mono" placeholder="X-API-Key" autocomplete="off" spellcheck="false" />
+          <label class="field-label">Value</label>
+          <input type="text" id="auth-apikey-value" class="text-input mono" autocomplete="off" spellcheck="false" />
+          <label class="field-label">Add to</label>
+          <select id="auth-apikey-target">
+            <option value="header">Header</option>
+            <option value="query">Query params</option>
+          </select>
+        </div>
+      </section>
+
+      <section id="panel-headers" class="panel">
+        <div class="kv-editor" id="headers-editor"></div>
+        <button class="btn btn-ghost btn-sm add-row-btn" data-editor="headers-editor">+ Add header</button>
+      </section>
+
+      <section id="panel-body" class="panel">
+        <div class="body-type-row">
+          <label><input type="radio" name="body-type" value="none" checked /> None</label>
+          <label><input type="radio" name="body-type" value="json" /> JSON</label>
+          <label><input type="radio" name="body-type" value="text" /> Text</label>
+          <label><input type="radio" name="body-type" value="form" /> Form URL-encoded</label>
+        </div>
+        <textarea id="body-json" class="body-textarea hidden" placeholder="{&#10;  &quot;key&quot;: &quot;value&quot;&#10;}" spellcheck="false"></textarea>
+        <textarea id="body-text" class="body-textarea hidden" placeholder="Raw request body" spellcheck="false"></textarea>
+        <div id="body-form" class="kv-editor hidden"></div>
+        <button class="btn btn-ghost btn-sm add-row-btn hidden" id="body-form-add" data-editor="body-form">+ Add field</button>
+      </section>
+
+    </div>
+
+    <div class="response-area">
+      <div class="response-header">
+        <h2>Response</h2>
+        <div id="response-meta" class="response-meta"></div>
+      </div>
+      <div id="response-empty" class="response-empty">Send a request to see the response here.</div>
+      <div id="response-body-wrap" class="response-body-wrap hidden">
+        <div class="tabs" data-target="response-panels">
+          <button class="tab active" data-tab="resp-body">Body</button>
+          <button class="tab" data-tab="resp-headers">Headers</button>
+        </div>
+        <div id="response-panels" class="request-panels">
+          <section id="panel-resp-body" class="panel active">
+            <pre id="response-body" class="response-body"></pre>
+          </section>
+          <section id="panel-resp-headers" class="panel">
+            <table id="response-headers" class="headers-table"></table>
+          </section>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
